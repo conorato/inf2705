@@ -280,9 +280,9 @@ void afficherBestiole()
       // ajouter une ou des transformations afin de centrer le corps à la position courante "bestiole.position[]",
       // avec l'angle de rotation "bestiole.angleCorps" et de la taille "bestiole.taille"
       
-      //matrModel.Translate(bestiole.position.x, bestiole.position.y, bestiole.position.z);
-	  //matrModel.Rotate(angleCorps, 0.0, 0.0, 1.0);
-	  //matrModel.Scale(bestiole.taille, bestiole.taille, bestiole.taille); 
+      matrModel.Translate(bestiole.position.x, bestiole.position.y, bestiole.position.z);
+	  matrModel.Rotate(bestiole.angleCorps, 0.0, 0.0, 1.0);
+	  matrModel.Scale(bestiole.taille, bestiole.taille, bestiole.taille); 
 	  
       // afficher le corps à la position courante
       
@@ -330,8 +330,9 @@ void afficherBestiole()
       glVertexAttrib3f( locColor, 1.0, 1.0, 0.0 ); // jaune; équivalent au glColor() de OpenGL 2.x
       matrModel.PushMatrix();{
 		 matrModel.Scale( 2.0, 1.0, 1.0);
-         matrModel.Translate( 0.0, 1.5, 0.0 );
-         afficherRepereCourant( ); // débogage
+		 afficherRepereCourant( ); // débogage
+         matrModel.Translate( 0.0, cos(45), sin(45));
+         //afficherRepereCourant( ); // débogage
          glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
          afficherQuad();
          
