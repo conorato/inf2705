@@ -1,0 +1,20 @@
+Q1: Supposons que les coordonnées du modèle soient exprimées dans un système
+    de coordonnées « main gauche » (au lieu du l'habituel « main droite »).
+    Comment devrait-on alors modifier la matrice 4x4 servant à la rotation
+    afin de préserver le même effet visuel d'une rotation positive ?  Quelle
+    serait la nouvelle matrice pour une rotation autour de l'axe des Z ?
+
+
+
+Q2: Dans ce TP, on peut déplacer la bestiole avec les flèches du clavier ou
+    encore lancer un déplacement « automatique » avec la touche 'espace'.
+    La bestiole se déplace alors dans différentes directions, entre en
+    collision avec les parois du cube qui la contient et son mouvement (son
+    déplacement) change alors de direction.
+
+    Lorsque la bestiole se déplace ainsi, comment peut-on toujours montrer
+    la bestiole se déplaçant en regardant vers l'avant, c'est-à-dire dans le
+    sens de son mouvement. Comment faire en sorte que la tête (et le corps)
+    soit toujours dirigée dans le sens de son mouvement ?
+    Décrivez (avec assez de détails) comment vous implanteriez ceci dans ce TP.
+
