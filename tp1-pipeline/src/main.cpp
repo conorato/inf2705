@@ -280,9 +280,9 @@ void afficherBestiole()
       // ajouter une ou des transformations afin de centrer le corps à la position courante "bestiole.position[]",
       // avec l'angle de rotation "bestiole.angleCorps" et de la taille "bestiole.taille"
       
-      matrModel.Translate(bestiole.position.x, bestiole.position.y, bestiole.position.z);
-	  matrModel.Rotate(bestiole.angleCorps, 0.0, 0.0, 1.0);
-	  matrModel.Scale(bestiole.taille, bestiole.taille, bestiole.taille); 
+//       matrModel.Translate(bestiole.position.x, bestiole.position.y, bestiole.position.z);
+// 	  matrModel.Rotate(bestiole.angleCorps, 0.0, 0.0, 1.0);
+// 	  matrModel.Scale(bestiole.taille, bestiole.taille, bestiole.taille); 
 	  
       // afficher le corps à la position courante
       
@@ -296,20 +296,18 @@ void afficherBestiole()
          case 1: // une bestiole (plutôt extraterrestre)
             // afficher le corps
             glVertexAttrib3f( locColor, 0.0, 1.0, 0.0 ); // vert; équivalent au glColor() de OpenGL 2.x
-            
             matrModel.PushMatrix();{
                // ==> Avant de tracer, on doit informer la carte graphique des changements faits à la matrice de modélisation
                matrModel.Rotate(90.0, 0.0, 1.0, 0.0);
-               matrModel.Translate(0.0, 0.0, -1.0);
-			   matrModel.Scale(1.0, 1.0, 2.0);
+               matrModel.Translate(0.0, 0.0, -1.0 * bestiole.taille);
+			   matrModel.Scale(bestiole.taille * 1.0, bestiole.taille * 1.0, bestiole.taille * 2.0);
                glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
                afficherCylindre();
-               matrModel.Translate(0.0, 0.0, 1.0);
             }matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
             // afficher la tête
             glVertexAttrib3f( locColor, 1.0, 0.0, 1.0 ); // magenta; équivalent au glColor() de OpenGL 2.x
             matrModel.PushMatrix();{
-               matrModel.Translate( 1.0, 0.0, 1.0 + 0.25); // Position : rayon du cylindre + rayon sphere
+               matrModel.Translate( 1.0 * bestiole.taille, 0.0, 1.0 * bestiole.taille + 0.25); // Position : rayon du cylindre + rayon sphere = 
                glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
                afficherSphere();
             }matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
@@ -329,19 +327,22 @@ void afficherBestiole()
       // afficher les deux ailes
       glVertexAttrib3f( locColor, 1.0, 1.0, 0.0 ); // jaune; équivalent au glColor() de OpenGL 2.x
       matrModel.PushMatrix();{
-		 matrModel.Scale( 2.0, 1.0, 1.0);
-		 afficherRepereCourant( ); // débogage
-         matrModel.Translate( 0.0, cos(45), sin(45));
-         //afficherRepereCourant( ); // débogage
-         glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-         afficherQuad();
-         
-         matrModel.Translate( 0.0, -3, 0.0 ); // (bidon) À MODIFIER
-         // afficherRepereCourant( ); // débogage
+         const float ANGLE = 45 * M_PI/180.0;
+         matrModel.Translate( 0.0, (cos(ANGLE) + 0.5) * bestiole.taille , sin(ANGLE) * bestiole.taille); 
+         matrModel.Scale( bestiole.taille * 2.0, bestiole.taille * 1.0, bestiole.taille * 1.0);
          glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
          afficherQuad();
       }matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-
+      
+      matrModel.PushMatrix();{
+         const float ANGLE = 45 * M_PI/180.0;
+         matrModel.Translate( 0.0, (cos(ANGLE) + 0.5) * -bestiole.taille , sin(ANGLE) * bestiole.taille); 
+         matrModel.Scale( bestiole.taille * 2.0, bestiole.taille * 1.0, bestiole.taille * 1.0);
+         glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+         afficherQuad();
+      }matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+      
+      
       // ajouter une ou des transformations afin de tracer les pattes de rayon "bestiole.rayonPatte" et longueur "bestiole.longPatte"
       // afficher les quatre pattes
       glVertexAttrib3f( locColor, 0.5, 0.5, 1.0 ); // bleu foncé; équivalent au glColor() de OpenGL 2.x
