@@ -340,41 +340,16 @@ void afficherBestiole()
      
       glVertexAttrib3f( locColor, 0.5, 0.5, 1.0 ); // bleu foncé; équivalent au glColor() de OpenGL 2.x
       
-      //for(int i = -1; i<=1; i+=2;)
-      
-     //patte arrière droite
-      matrModel.PushMatrix();{
-         matrModel.Translate( -bestiole.taille * 1.0,  bestiole.taille * cos(ANGLE), -bestiole.taille * sin(ANGLE));  // -1, +cos
-         matrModel.Rotate(bestiole.anglePatte + 180.0, 1.0, 1.0, 0.0);                                                // +1, + axe
-         matrModel.Scale( bestiole.rayonPatte, bestiole.rayonPatte, bestiole.longPatte);
-         glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-         afficherCylindre();
-      }matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-      //patte arrière gauche
-      matrModel.PushMatrix();{
-         matrModel.Translate( -bestiole.taille * 1.0,  -bestiole.taille * cos(ANGLE), -bestiole.taille * sin(ANGLE)); // -1, -cos,
-         matrModel.Rotate(-bestiole.anglePatte + 180.0, 1.0, -1.0, 0.0);                                              // -1, - axe
-         matrModel.Scale( bestiole.rayonPatte, bestiole.rayonPatte, bestiole.longPatte);
-         glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-         afficherCylindre();
-      }matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-      //patte avant droite
-      matrModel.PushMatrix();{
-         matrModel.Translate( bestiole.taille * 1.0,  bestiole.taille * cos(ANGLE), -bestiole.taille * sin(ANGLE)); // +1,   +cos
-         matrModel.Rotate(bestiole.anglePatte + 180.0, 1.0, -1.0, 0.0);                                             // +1,  - axe
-         matrModel.Scale( bestiole.rayonPatte, bestiole.rayonPatte, bestiole.longPatte);
-         glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-         afficherCylindre();
-      }matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-      
-      //patte avant gauche
-      matrModel.PushMatrix();{
-         matrModel.Translate( bestiole.taille * 1.0,  -bestiole.taille * cos(ANGLE), -bestiole.taille * sin(ANGLE)); // +1,   -cos
-         matrModel.Rotate(-bestiole.anglePatte + 180.0, 1.0, 1.0, 0.0);                                              // -1, + axe
-         matrModel.Scale( bestiole.rayonPatte, bestiole.rayonPatte, bestiole.longPatte);
-         glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-         afficherCylindre();
-      }matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+      //On utilise une suite alternante pour bien configurer nos paramètres de translation et de rotation. (-1)^ * paramètre à alterner.
+      for(int i = 1; i<=4; i+=1){
+          matrModel.PushMatrix();{
+              matrModel.Translate(pow(-1,(i+1)/2) * bestiole.taille * 1.0, pow(-1,(i+1)) * bestiole.taille * cos(ANGLE), -bestiole.taille * sin(ANGLE));
+              matrModel.Rotate(pow(-1,(i+1)) * bestiole.anglePatte + 180.0, 1.0, pow(-1,i/2) * 1.0, 0.0);                                                
+              matrModel.Scale( bestiole.rayonPatte, bestiole.rayonPatte, bestiole.longPatte);
+              glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+              afficherCylindre();
+          }matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+      }
 
    }matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
    glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel ); // informer ...
