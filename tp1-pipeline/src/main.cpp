@@ -205,11 +205,19 @@ void FenetreTP::initialiser()
 
    // (partie 2) MODIFICATIONS ICI ...
    // créer le VBO pour les sommets
-   // ...
+   glGenBuffers( 1, &vboTheiereSommets );
+   glBindBuffer( GL_ARRAY_BUFFER, vboTheiereSommets );
+   glBufferData( GL_ARRAY_BUFFER, sizeof(gTheiereSommets), gTheiereSommets, GL_STATIC_DRAW );
+   // Faire le lien avec l'attribut du nuanceur de sommets
+   glVertexAttribPointer( locVertex, 3, GL_FLOAT, GL_FALSE, 0, 0 );
+   glEnableVertexAttribArray(locVertex);
 
+   
    // créer le VBO la connectivité
-   // ...
-
+   glGenBuffers( 1, &vboTheiereConnec );
+   glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, vboTheiereConnec );
+   glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(gTheiereConnec), gTheiereConnec, GL_STATIC_DRAW );
+   
    glBindVertexArray(0);
 
    // créer quelques autres formes
@@ -262,10 +270,7 @@ void afficherTheiere()
    glBindVertexArray( vao[1] );
    // (partie 2) MODIFICATIONS ICI ...
    // vous pouvez utiliser temporairement cette fonction pour la première partie du TP, mais vous ferez mieux dans la seconde partie du TP
-   glBegin( GL_TRIANGLES );
-   for ( unsigned int i = 0 ; i < sizeof(gTheiereConnec)/sizeof(GLuint) ; i++ )
-      glVertex3fv( &(gTheiereSommets[3*gTheiereConnec[i]] ) );
-   glEnd( );
+   glDrawElements( GL_TRIANGLES, sizeof(gTheiereConnec), GL_UNSIGNED_INT, 0);
    glBindVertexArray(0);
 }
 
@@ -310,7 +315,9 @@ void afficherBestiole()
          case 2: // une théière
             glVertexAttrib3f( locColor, 0.0, 1.0, 0.0 ); // vert; équivalent au glColor() de OpenGL 2.x
             matrModel.PushMatrix();{
-               matrModel.Rotate(90.0, 1.0, 0.0, 0.0);
+                afficherRepereCourant(); 
+                matrModel.Rotate(90.0, 1.0, 0.0, 0.0);
+                matrModel.Rotate(-90.0 * bestiole.position.z/etat.dimBoite, 0.0, 0.0, 1.0);
                matrModel.Translate(0.0, -1.0 * bestiole.taille, 0.0);
                matrModel.Scale( bestiole.taille * 0.5, bestiole.taille * 0.5, bestiole.taille * 0.5 );
                glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
