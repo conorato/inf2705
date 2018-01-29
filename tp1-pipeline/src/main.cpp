@@ -1,7 +1,6 @@
 // Prénoms, noms et matricule des membres de l'équipe:
-// - Prénom1 NOM1 (matricule1)
-// - Prénom2 NOM2 (matricule2)
-#warning "Écrire les prénoms, noms et matricule des membres de l'équipe dans le fichier et commenter cette ligne"
+// - William HARVEY (1851388)
+// - Claudia ONORATO (1845448)
 
 #include <iostream>
 #include <math.h>
@@ -212,7 +211,6 @@ void FenetreTP::initialiser()
    glVertexAttribPointer( locVertex, 3, GL_FLOAT, GL_FALSE, 0, 0 );
    glEnableVertexAttribArray(locVertex);
 
-   
    // créer le VBO la connectivité
    glGenBuffers( 1, &vboTheiereConnec );
    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, vboTheiereConnec );
@@ -268,8 +266,6 @@ void afficherQuad( )
 void afficherTheiere()
 {
    glBindVertexArray( vao[1] );
-   // (partie 2) MODIFICATIONS ICI ...
-   // vous pouvez utiliser temporairement cette fonction pour la première partie du TP, mais vous ferez mieux dans la seconde partie du TP
    glDrawElements( GL_TRIANGLES, sizeof(gTheiereConnec), GL_UNSIGNED_INT, 0);
    glBindVertexArray(0);
 }
@@ -343,9 +339,7 @@ void afficherBestiole()
           }matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
       }
       
-      // ajouter une ou des transformations afin de tracer les pattes de rayon "bestiole.rayonPatte" et longueur "bestiole.longPatte"
       // afficher les quatre pattes
-     
       glVertexAttrib3f( locColor, 0.5, 0.5, 1.0 ); // bleu foncé; équivalent au glColor() de OpenGL 2.x
       
       //On utilise une suite alternante pour bien configurer nos paramètres de translation et de rotation. (-1)^ * paramètre à alterner.
