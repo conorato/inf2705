@@ -5,7 +5,13 @@ Q1: Supposons que les coordonnées du modèle soient exprimées dans un système
     serait la nouvelle matrice pour une rotation autour de l'axe des Z ?
 
 REP:Si l'on tente d'imiter la convention de la main droite avec la main gauche, on se rend     
-    compte que deux de nos coordonnées conservent le même sens et que la dernière est de sens opposé (nos doigts ne pouvant pas s'articuler dans le sens contraire des articulations). Alors, en inversant une coordonnée, par exemple X, on obtient exactement la convention de la main droite avec toutes les coordonnées correspondantes. Ainsi, pour obtenir le même effet visuel d'une rotation positive, il faut observer si le sens (horaire ou anti-horaire) est le même que le système de coordonnées de main droite. Si ce sens diffère, il faudra inverser les signes des composantes correspondantes dans la matrice.
+    compte que deux de nos coordonnées conservent le même sens et que la dernière est de sens 
+	opposé (nos doigts ne pouvant pas s'articuler dans le sens contraire des articulations). 
+	Alors, en inversant une coordonnée, par exemple X, on obtient exactement la convention de 
+	la main droite avec toutes les coordonnées correspondantes. Ainsi, pour obtenir le même effet
+	visuel d'une rotation positive, il faut observer si le sens (horaire ou anti-horaire) est le
+	même que le système de coordonnées de main droite. Si ce sens diffère, il faudra inverser les
+	signes des composantes correspondantes dans la matrice.
     
     Par exemple, pour une rotation positive d'angle « a » autour de l'axe des z dans un système de coordonnées de la main droite :
      _                  _    _     _                _
@@ -35,11 +41,13 @@ Q2: Dans ce TP, on peut déplacer la bestiole avec les flèches du clavier ou
     soit toujours dirigée dans le sens de son mouvement ?
     Décrivez (avec assez de détails) comment vous implanteriez ceci dans ce TP.
 
-REP:Pour ce faire, on souhaite conserver la position du modèle au dernier affichage. Ainsi, 
-    il est possible de calculer la différence entre l'ancienne position et la nouvelle. On a donc deltaX, deltaY et deltaZ qui représentent les coordonnées d'un vecteur indiquant le déplacement du modèle. On souhaite que le modèle soit orienté dans le sens du déplacement. Ainsi, on veut trouver les angles en X,Y et Z du vecteur déplacement, car ces angles représentent ceuxdu modèle.
+REP:Pour ce faire, on souhaite conserver la position du modèle au dernier affichage.
+	Ainsi, il est possible de calculer la différence entre l'ancienne position et la
+	nouvelle. On a donc deltaX, deltaY et deltaZ qui représentent les coordonnées d'un
+	vecteur indiquant le déplacement du modèle. On souhaite que le modèle soit orienté
+	dans le sens du déplacement. Ainsi, on veut trouver les angles de la projection du
+	vecteur de déplacement sur le plan XY et le plan XZ, car ces angles représentent
+	l'orientation du modèle. 
     
-    arctan(anglePhi) = deltaX/deltaY
-    arctan(angleTheta) = deltaX/deltaZ
-    
-    
-    
+    phi = arctan(deltaY/deltaX)
+    theta = arctan(deltaX/deltaZ)	
