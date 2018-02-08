@@ -128,7 +128,15 @@ public:
 
             // la couleur du corps
             glVertexAttrib4fv( locColor, glm::value_ptr(couleur) );
-
+			
+			// Fusion des couleurs (Partie 1)
+			if( this->couleur.a < 1.0 ) {
+				glEnable( GL_BLEND );
+				glDepthMask( GL_FALSE );
+				glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+			}
+			
+			
             switch ( etat.modele )
             {
             default:
@@ -145,7 +153,14 @@ public:
                theiere->afficher( );
                break;
             }
-
+            
+            // Désactiver la fusion de couleurs et activer le tampon de profondeur
+            if( this->couleur.a < 1.0 ) {
+				glDepthMask( GL_TRUE );
+				glDisable( GL_BLEND );
+			}
+			
+			
          } matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
 
       } matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
@@ -321,14 +336,24 @@ void FenetreTP::initialiser()
                       taille, -taille, 0,
                      -taille, -taille, 0 };
    const GLuint connec[] = { 0, 1, 2, 2, 3, 0 };
-
+   
    // partie 1: initialiser le VAO (quad)
-   // ...
+   glGenVertexArrays( 1, &vao );
+   glBindVertexArray( vao );
+   
    // partie 1: créer les deux VBO pour les sommets et la connectivité
-   // ...
+   glGenBuffers( 2, vbo );
+   
+   glBindBuffer( GL_ARRAY_BUFFER, vbo[0] );
+   glBufferData( GL_ARRAY_BUFFER, sizeof(coo), coo, GL_STATIC_DRAW );
+   glVertexAttribPointer( locVertex, 3, GL_FLOAT, GL_FALSE, 0, 0 );
+   glEnableVertexAttribArray( locVertex );
 
-   // ...
-
+   glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, vbo[1] );
+   glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(connec), connec, GL_STATIC_DRAW );
+   
+   glBindVertexArray( 0 );
+   
    // construire le graphe de scène
    Soleil.ajouteEnfant(Terre);
    Terre.ajouteEnfant(Lune);
@@ -369,11 +394,22 @@ void afficherQuad( GLfloat alpha ) // le plan qui ferme les solides
    glVertexAttrib4f( locColor, 1.0, 1.0, 1.0, alpha );
    // afficher le plan tourné selon l'angle courant et à la position courante
    // partie 1: modifs ici ...
+   if( alpha < 1.0 ) {
+      glEnable( GL_BLEND );
+      glDepthMask( GL_FALSE );
+      glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+   }
+   
+   
+   glBindVertexArray( vao );
+   glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
+   glBindVertexArray(0);
    // ...
-   // glBindVertexArray( vao );
-   // glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
-   // glBindVertexArray(0);
-   // ...
+   
+   if( alpha < 1.0 ) {
+	 glDepthMask( GL_TRUE );
+	 glDisable( GL_BLEND );
+   }
 }
 
 void afficherModele()
@@ -424,7 +460,22 @@ void FenetreTP::afficherScene( )
 
    // afficher le modèle et tenir compte du stencil et du plan de coupe
    // partie 1: modifs ici ...
+   
+   glEnable( GL_STENCIL_TEST );
+   glStencilFunc( GL_NEVER, 1, 1 ); 
+   glStencilOp( GL_REPLACE, GL_REPLACE, GL_REPLACE );
+   
+   glEnable( GL_CLIP_PLANE0 );
    afficherModele();
+   glDisable( GL_CLIP_PLANE0 );
+   
+   // Le stencil étant maintenant rempli de 1 à la position des planètes, 
+   // on trace le plan blanc. 
+   glStencilFunc( GL_EQUAL, 1, 1 );
+   glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
+   afficherQuad( 1.0 );
+   glDisable( GL_STENCIL_TEST );
+   
 
    // en plus, dessiner le plan en transparence pour bien voir son étendue
    afficherQuad( 0.25 );
