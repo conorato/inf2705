@@ -95,11 +95,11 @@ class CorpsCeleste
 {
 public:
    CorpsCeleste( float r, float dist, float rot, float rev, float vitRot, float vitRev,
-                 glm::vec4 coul=glm::vec4(1.,1.,1.,1.) ) :
+                 glm::vec4 coul=glm::vec4(1.,1.,1.,1.), glm::vec3 coulSel=glm::vec3(1.,1.,1.) ) :
       rayon(r), distance(dist),
       rotation(rot), revolution(rev),
       vitRotation(vitRot), vitRevolution(vitRev),
-      couleur(coul)
+      couleur(coul), estSelectionne(false), couleurSel(coulSel) 
    { }
 
    void ajouteEnfant( CorpsCeleste &bebe )
@@ -129,13 +129,12 @@ public:
             // la couleur du corps
             glVertexAttrib4fv( locColor, glm::value_ptr(couleur) );
 			
-			// Fusion des couleurs (Partie 1)
-			if( this->couleur.a < 1.0 ) {
-				glEnable( GL_BLEND );
-				glDepthMask( GL_FALSE );
-				glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-			}
-			
+						// Fusion des couleurs (Partie 1)
+						if( this->couleur.a < 1.0 ) {
+							glEnable( GL_BLEND );
+							glDepthMask( GL_FALSE );
+							glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+						}
 			
             switch ( etat.modele )
             {
@@ -156,10 +155,9 @@ public:
             
             // Désactiver la fusion de couleurs et activer le tampon de profondeur
             if( this->couleur.a < 1.0 ) {
-				glDepthMask( GL_TRUE );
-				glDisable( GL_BLEND );
-			}
-			
+							glDepthMask( GL_TRUE );
+							glDisable( GL_BLEND );
+						}
 			
          } matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
 
@@ -168,9 +166,12 @@ public:
 
    void avancerPhysique()
    {
-      const float dt = 0.5; // intervalle entre chaque affichage (en secondes)
-      rotation += dt * vitRotation;
-      revolution += dt * vitRevolution;
+      if( !this->estSelectionne ) 
+      {
+         const float dt = 0.5; // intervalle entre chaque affichage (en secondes)
+         rotation += dt * vitRotation;
+         revolution += dt * vitRevolution;
+      }
    }
 
    std::vector<CorpsCeleste*> enfants; // la liste des enfants
@@ -181,25 +182,25 @@ public:
    float vitRotation;    // la vitesse de rotation
    float vitRevolution;  // la vitesse de révolution
    glm::vec4 couleur;    // la couleur du corps
-   //bool estSelectionne;  // le corps est sélectionné ?
-   //glm::vec3 couleurSel; // la couleur en mode sélection
+   bool estSelectionne;  // le corps est sélectionné ?
+   glm::vec3 couleurSel; // la couleur en mode sélection
 };
 
 //                     rayon  dist  rota revol vrota  vrevol
-CorpsCeleste Soleil(   4.00,  0.0,  0.0,  0.0, 0.05, 0.0,  glm::vec4(1.0, 1.0, 0.0, 0.5) );
+CorpsCeleste Soleil(   4.00,  0.0,  0.0,  0.0, 0.05, 0.0,  glm::vec4(1.0, 1.0, 0.0, 0.5), glm::vec3(0.01, 0.0, 0.0) );
 
-CorpsCeleste Terre(    0.70,  7.0, 30.0, 30.0, 2.5,  0.10, glm::vec4(0.5, 0.5, 1.0, 1.0) );
-CorpsCeleste Lune(     0.20,  1.5, 20.0, 30.0, 2.5, -0.35, glm::vec4(0.6, 0.6, 0.6, 1.0) );
+CorpsCeleste Terre(    0.70,  7.0, 30.0, 30.0, 2.5,  0.10, glm::vec4(0.5, 0.5, 1.0, 1.0), glm::vec3(0.02, 0.0, 0.0) );
+CorpsCeleste Lune(     0.20,  1.5, 20.0, 30.0, 2.5, -0.35, glm::vec4(0.6, 0.6, 0.6, 1.0), glm::vec3(0.03, 0.0, 0.0) );
 
-CorpsCeleste Mars(     0.50, 11.0, 20.0,140.0, 2.5,  0.13, glm::vec4(0.6, 1.0, 0.5, 1.0) );
-CorpsCeleste Phobos(   0.20,  1.0,  5.0, 15.0, 3.5,  1.7,  glm::vec4(0.4, 0.4, 0.8, 1.0) );
-CorpsCeleste Deimos(   0.25,  1.7, 10.0,  2.0, 4.0,  0.5,  glm::vec4(0.5, 0.5, 0.1, 1.0) );
+CorpsCeleste Mars(     0.50, 11.0, 20.0,140.0, 2.5,  0.13, glm::vec4(0.6, 1.0, 0.5, 1.0), glm::vec3(0.04, 0.0, 0.0) );
+CorpsCeleste Phobos(   0.20,  1.0,  5.0, 15.0, 3.5,  1.7,  glm::vec4(0.4, 0.4, 0.8, 1.0), glm::vec3(0.05, 0.0, 0.0) );
+CorpsCeleste Deimos(   0.25,  1.7, 10.0,  2.0, 4.0,  0.5,  glm::vec4(0.5, 0.5, 0.1, 1.0), glm::vec3(0.06, 0.0, 0.0) );
 
-CorpsCeleste Jupiter(  1.20, 16.0, 10.0, 40.0, 0.2,  0.02, glm::vec4(1.0, 0.5, 0.5, 1.0) );
-CorpsCeleste Io(       0.20,  1.7,  5.0,  1.5, 2.5,  4.3,  glm::vec4(0.7, 0.4, 0.5, 1.0) );
-CorpsCeleste Europa(   0.25,  2.5, 87.0, 11.9, 3.5,  3.4,  glm::vec4(0.4, 0.4, 0.8, 1.0) );
-CorpsCeleste Ganymede( 0.30,  3.1, 10.0, 42.4, 4.0,  1.45, glm::vec4(0.5, 0.5, 0.1, 1.0) );
-CorpsCeleste Callisto( 0.35,  4.0, 51.0, 93.1, 1.0,  0.45, glm::vec4(0.7, 0.5, 0.1, 1.0) );
+CorpsCeleste Jupiter(  1.20, 16.0, 10.0, 40.0, 0.2,  0.02, glm::vec4(1.0, 0.5, 0.5, 1.0), glm::vec3(0.07, 0.0, 0.0) );
+CorpsCeleste Io(       0.20,  1.7,  5.0,  1.5, 2.5,  4.3,  glm::vec4(0.7, 0.4, 0.5, 1.0), glm::vec3(0.08, 0.0, 0.0) );
+CorpsCeleste Europa(   0.25,  2.5, 87.0, 11.9, 3.5,  3.4,  glm::vec4(0.4, 0.4, 0.8, 1.0), glm::vec3(0.09, 0.0, 0.0) );
+CorpsCeleste Ganymede( 0.30,  3.1, 10.0, 42.4, 4.0,  1.45, glm::vec4(0.5, 0.5, 0.1, 1.0), glm::vec3(0.10, 0.0, 0.0) );
+CorpsCeleste Callisto( 0.35,  4.0, 51.0, 93.1, 1.0,  0.45, glm::vec4(0.7, 0.5, 0.1, 1.0), glm::vec3(0.11, 0.0, 0.0) );
 
 
 void calculerPhysique( )
@@ -400,11 +401,14 @@ void afficherQuad( GLfloat alpha ) // le plan qui ferme les solides
       glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
    }
    
-   
-   glBindVertexArray( vao );
-   glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
-   glBindVertexArray(0);
-   // ...
+   matrModel.PushMatrix();{
+      matrModel.Translate( 0.0, 0.0, -etat.planCoupe.z * etat.planCoupe.w); 	
+      matrModel.Rotate( etat.angleCoupe, 0.0, 1.0, 0.0 );
+	  glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
+   	  glBindVertexArray( vao );
+      glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
+      glBindVertexArray(0);
+   }matrModel.PopMatrix();
    
    if( alpha < 1.0 ) {
 	 glDepthMask( GL_TRUE );
@@ -462,23 +466,26 @@ void FenetreTP::afficherScene( )
    // partie 1: modifs ici ...
    
    glEnable( GL_STENCIL_TEST );
-   glStencilFunc( GL_NEVER, 1, 1 ); 
-   glStencilOp( GL_REPLACE, GL_REPLACE, GL_REPLACE );
-   
+   glStencilFunc( GL_ALWAYS, 1, 1 ); 
+   glStencilOp( GL_INCR, GL_INCR, GL_INCR );
+
    glEnable( GL_CLIP_PLANE0 );
    afficherModele();
    glDisable( GL_CLIP_PLANE0 );
    
-   // Le stencil étant maintenant rempli de 1 à la position des planètes, 
+   // Le stencil étant maintenant rempli de 1 (au premier bit) à la position des planètes, 
    // on trace le plan blanc. 
    glStencilFunc( GL_EQUAL, 1, 1 );
-   glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
+   glStencilOp( GL_REPLACE, GL_REPLACE, GL_REPLACE );
    afficherQuad( 1.0 );
    glDisable( GL_STENCIL_TEST );
    
 
    // en plus, dessiner le plan en transparence pour bien voir son étendue
-   afficherQuad( 0.25 );
+   if ( !etat.modeSelection ) 
+      afficherQuad( 0.25 );
+      
+   
 }
 
 void FenetreTP::redimensionner( GLsizei w, GLsizei h )
@@ -644,8 +651,14 @@ int main( int argc, char *argv[] )
 
       // affichage
       fenetre.afficherScene();
-      fenetre.swap();
 
+      if( etat.modeSelection ) 
+      {
+         etat.modeSelection = pressed = false;
+      }
+      else
+        fenetre.swap();
+      
       // récupérer les événements et appeler la fonction de rappel
       boucler = fenetre.gererEvenement();
    }
