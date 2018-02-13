@@ -95,7 +95,7 @@ class CorpsCeleste
 {
 public:
    CorpsCeleste( float r, float dist, float rot, float rev, float vitRot, float vitRev,
-                 glm::vec4 coul=glm::vec4(1.,1.,1.,1.), glm::vec3 coulSel=glm::vec3(1.,1.,1.) ) :
+                 glm::vec4 coul=glm::vec4(1.,1.,1.,1.), glm::vec4 coulSel=glm::vec4(1.,1.,1., 1.) ) :
       rayon(r), distance(dist),
       rotation(rot), revolution(rev),
       vitRotation(vitRot), vitRevolution(vitRev),
@@ -127,14 +127,17 @@ public:
             glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
 
             // la couleur du corps
-            glVertexAttrib4fv( locColor, glm::value_ptr(couleur) );
+            if( etat.modeSelection ) 
+			    glVertexAttrib3fv( locColor, glm::value_ptr(couleurSel) );
+			else 
+			    glVertexAttrib4fv( locColor, glm::value_ptr(couleur) );
 			
-						// Fusion des couleurs (Partie 1)
-						if( this->couleur.a < 1.0 ) {
-							glEnable( GL_BLEND );
-							glDepthMask( GL_FALSE );
-							glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-						}
+			// Fusion des couleurs (Partie 1)
+			if( this->couleur.a < 1.0 && !etat.modeSelection ) {
+				glEnable( GL_BLEND );
+				glDepthMask( GL_FALSE );
+				glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+			}
 			
             switch ( etat.modele )
             {
@@ -154,10 +157,10 @@ public:
             }
             
             // Désactiver la fusion de couleurs et activer le tampon de profondeur
-            if( this->couleur.a < 1.0 ) {
-							glDepthMask( GL_TRUE );
-							glDisable( GL_BLEND );
-						}
+            if( this->couleur.a < 1.0 && !etat.modeSelection ) {
+				glDepthMask( GL_TRUE );
+				glDisable( GL_BLEND );
+			}
 			
          } matrModel.PopMatrix(); glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
 
@@ -183,24 +186,41 @@ public:
    float vitRevolution;  // la vitesse de révolution
    glm::vec4 couleur;    // la couleur du corps
    bool estSelectionne;  // le corps est sélectionné ?
-   glm::vec3 couleurSel; // la couleur en mode sélection
+   glm::vec4 couleurSel; // la couleur en mode sélection
 };
 
+// Couleur affichee
+
+const glm::vec4 coulAffichee[11] = { 
+    glm::vec4(1.0, 1.0, 0.0, 0.5), 
+    glm::vec4(0.5, 0.5, 1.0, 1.0),
+    glm::vec4(0.6, 0.6, 0.6, 1.0),
+    glm::vec4(0.6, 1.0, 0.5, 1.0),
+    glm::vec4(0.4, 0.4, 0.8, 1.0),
+    glm::vec4(0.5, 0.5, 0.1, 1.0),
+    glm::vec4(1.0, 0.5, 0.5, 1.0),
+    glm::vec4(0.7, 0.4, 0.5, 1.0),
+    glm::vec4(0.4, 0.4, 0.8, 1.0),
+    glm::vec4(0.5, 0.5, 0.1, 1.0),
+    glm::vec4(0.7, 0.5, 0.1, 1.0)
+};
+
+
 //                     rayon  dist  rota revol vrota  vrevol
-CorpsCeleste Soleil(   4.00,  0.0,  0.0,  0.0, 0.05, 0.0,  glm::vec4(1.0, 1.0, 0.0, 0.5), glm::vec3(0.01, 0.0, 0.0) );
+CorpsCeleste Soleil(   4.00,  0.0,  0.0,  0.0, 0.05, 0.0, coulAffichee[0], glm::vec4(0.2, 0.0, 0.0, 1.0) );
 
-CorpsCeleste Terre(    0.70,  7.0, 30.0, 30.0, 2.5,  0.10, glm::vec4(0.5, 0.5, 1.0, 1.0), glm::vec3(0.02, 0.0, 0.0) );
-CorpsCeleste Lune(     0.20,  1.5, 20.0, 30.0, 2.5, -0.35, glm::vec4(0.6, 0.6, 0.6, 1.0), glm::vec3(0.03, 0.0, 0.0) );
+CorpsCeleste Terre(    0.70,  7.0, 30.0, 30.0, 2.5,  0.10, coulAffichee[1], glm::vec4(0.0, 0.2, 0.0, 1.0) );
+CorpsCeleste Lune(     0.20,  1.5, 20.0, 30.0, 2.5, -0.35, coulAffichee[2], glm::vec4(0.0, 0.0, 0.2, 1.0) );
 
-CorpsCeleste Mars(     0.50, 11.0, 20.0,140.0, 2.5,  0.13, glm::vec4(0.6, 1.0, 0.5, 1.0), glm::vec3(0.04, 0.0, 0.0) );
-CorpsCeleste Phobos(   0.20,  1.0,  5.0, 15.0, 3.5,  1.7,  glm::vec4(0.4, 0.4, 0.8, 1.0), glm::vec3(0.05, 0.0, 0.0) );
-CorpsCeleste Deimos(   0.25,  1.7, 10.0,  2.0, 4.0,  0.5,  glm::vec4(0.5, 0.5, 0.1, 1.0), glm::vec3(0.06, 0.0, 0.0) );
+CorpsCeleste Mars(     0.50, 11.0, 20.0,140.0, 2.5,  0.13, coulAffichee[3], glm::vec4(0.4, 0.0, 0.0, 1.0) );
+CorpsCeleste Phobos(   0.20,  1.0,  5.0, 15.0, 3.5,  1.7,  coulAffichee[4], glm::vec4(0.0, 0.4, 0.0, 1.0) );
+CorpsCeleste Deimos(   0.25,  1.7, 10.0,  2.0, 4.0,  0.5,  coulAffichee[5], glm::vec4(0.0, 0.0, 0.4, 1.0) );
 
-CorpsCeleste Jupiter(  1.20, 16.0, 10.0, 40.0, 0.2,  0.02, glm::vec4(1.0, 0.5, 0.5, 1.0), glm::vec3(0.07, 0.0, 0.0) );
-CorpsCeleste Io(       0.20,  1.7,  5.0,  1.5, 2.5,  4.3,  glm::vec4(0.7, 0.4, 0.5, 1.0), glm::vec3(0.08, 0.0, 0.0) );
-CorpsCeleste Europa(   0.25,  2.5, 87.0, 11.9, 3.5,  3.4,  glm::vec4(0.4, 0.4, 0.8, 1.0), glm::vec3(0.09, 0.0, 0.0) );
-CorpsCeleste Ganymede( 0.30,  3.1, 10.0, 42.4, 4.0,  1.45, glm::vec4(0.5, 0.5, 0.1, 1.0), glm::vec3(0.10, 0.0, 0.0) );
-CorpsCeleste Callisto( 0.35,  4.0, 51.0, 93.1, 1.0,  0.45, glm::vec4(0.7, 0.5, 0.1, 1.0), glm::vec3(0.11, 0.0, 0.0) );
+CorpsCeleste Jupiter(  1.20, 16.0, 10.0, 40.0, 0.2,  0.02, coulAffichee[6], glm::vec4(0.6, 0.0, 0.0, 1.0) );
+CorpsCeleste Io(       0.20,  1.7,  5.0,  1.5, 2.5,  4.3,  coulAffichee[7], glm::vec4(0.0, 0.6, 0.0, 1.0) );
+CorpsCeleste Europa(   0.25,  2.5, 87.0, 11.9, 3.5,  3.4,  coulAffichee[8], glm::vec4(0.0, 0.0, 0.6, 1.0) );
+CorpsCeleste Ganymede( 0.30,  3.1, 10.0, 42.4, 4.0,  1.45, coulAffichee[9], glm::vec4(0.8, 0.0, 0.0, 1.0) );
+CorpsCeleste Callisto( 0.35,  4.0, 51.0, 93.1, 1.0,  0.45, coulAffichee[10], glm::vec4(0.0, 0.8, 0.0, 1.0) );
 
 
 void calculerPhysique( )
@@ -480,12 +500,71 @@ void FenetreTP::afficherScene( )
    afficherQuad( 1.0 );
    glDisable( GL_STENCIL_TEST );
    
-
-   // en plus, dessiner le plan en transparence pour bien voir son étendue
-   if ( !etat.modeSelection ) 
-      afficherQuad( 0.25 );
+   if ( etat.modeSelection )
+   {
+      glFinish();    
+      GLint cloture[4]; glGetIntegerv( GL_VIEWPORT, cloture );
+      GLint posX = etat.sourisPosPrec.x, posY = cloture[3]-etat.sourisPosPrec.y;
       
-   
+      glReadBuffer( GL_BACK );
+      
+      Soleil.couleur   = Soleil.couleurSel;
+      Terre.couleur    = Terre.couleurSel;
+      Lune.couleur     = Lune.couleurSel;
+      Mars.couleur     = Mars.couleurSel;
+      Phobos.couleur   = Phobos.couleurSel;
+      Deimos.couleur   = Deimos.couleurSel;
+      Jupiter.couleur  = Jupiter.couleurSel;
+      Io.couleur       = Io.couleurSel;
+      Europa.couleur   = Europa.couleurSel;
+      Ganymede.couleur = Ganymede.couleurSel;
+      Callisto.couleur = Callisto.couleurSel;
+      
+      
+
+      GLfloat couleur[3];
+      glReadPixels( posX, posY, 1, 1, GL_RGB, GL_FLOAT, couleur );
+      std::cout << "r: " << couleur[0] << " g: " << couleur[1] << " b: "<< couleur[2] << std::endl;
+      
+      if( couleur[0] == Soleil.couleurSel[0] )
+        Soleil.estSelectionne = !Soleil.estSelectionne;
+      else if ( couleur[1] == Terre.couleurSel[1] ) 
+        Terre.estSelectionne = !Terre.estSelectionne;
+      else if ( couleur[2] == Lune.couleurSel[2] ) 
+        Lune.estSelectionne = !Lune.estSelectionne;
+      else if ( couleur[0] == Mars.couleurSel[0] ) 
+        Mars.estSelectionne = !Mars.estSelectionne;
+      else if ( couleur[1] == Phobos.couleurSel[1] ) 
+        Phobos.estSelectionne = !Phobos.estSelectionne;
+      else if ( couleur[2] == Deimos.couleurSel[2] ) 
+        Deimos.estSelectionne = !Deimos.estSelectionne;
+      else if ( couleur[0] == Jupiter.couleurSel[0] ) 
+        Jupiter.estSelectionne = !Jupiter.estSelectionne;
+      else if ( couleur[1] == Io.couleurSel[1] ) 
+        Io.estSelectionne = !Io.estSelectionne;
+      else if ( couleur[2] == Europa.couleurSel[2] ) 
+        Europa.estSelectionne = !Europa.estSelectionne;
+      else if ( couleur[0] == Ganymede.couleurSel[0] ) 
+        Ganymede.estSelectionne = !Ganymede.estSelectionne; 
+      else if ( couleur[1] == Callisto.couleurSel[1] ) 
+        Callisto.estSelectionne = !Callisto.estSelectionne; 
+       
+      Soleil.couleur   = coulAffichee[0];
+      Terre.couleur    = coulAffichee[1];
+      Lune.couleur     = coulAffichee[2];
+      Mars.couleur     = coulAffichee[3];
+      Phobos.couleur   = coulAffichee[4];
+      Deimos.couleur   = coulAffichee[5];
+      Jupiter.couleur  = coulAffichee[6];
+      Io.couleur       = coulAffichee[7];
+      Europa.couleur   = coulAffichee[8];
+      Ganymede.couleur = coulAffichee[9];
+      Callisto.couleur = coulAffichee[10];
+      
+      
+   } else {
+      afficherQuad( 0.25 );
+   }
 }
 
 void FenetreTP::redimensionner( GLsizei w, GLsizei h )
