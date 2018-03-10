@@ -35,14 +35,5 @@ void main( void )
       } else if ( dist <= finAttenuation && dist >= debAttenuation) {
          FragColor *= (1 - factDist);
       }
-
-      // pour déboguer et « voir » la dist, on peut utiliser:
-      //FragColor = vec4( vec3(dist-floor(dist)), 1.0 );
-      //FragColor = vec4( vec3(factDist), 1.0 );
    }
-
-
-   // pour déboguer et « voir » le comportement de z ou w, on peut utiliser:
-   //FragColor = vec4( vec3(gl_FragCoord.z), 1.0 );
-   //FragColor = vec4( vec3(gl_FragCoord.w), 1.0 );
 }

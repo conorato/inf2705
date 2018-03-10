@@ -5,6 +5,11 @@ Q1: Dans le nuanceur de sommets, si on souhaite calculer la profondeur du
 
     Pourquoi doit-on inverser le signe du résultat calculé ?
 
+REP:L'axe des z de la matrice de visualisation est orienté vers l'extérieur de l'écran. 
+Ainsi, la multiplication des matrices permet d'obtenir l'opposé de la pronfondeur, 
+puisque la coordonnée z de la matrice de visualisation est inversé par rapport aux autres matrices. 
+Le signe négatif permet tout simplement, d'inverser e signe de cette coordonnée z.
+
 
 Q2: Lorsqu'on calcule la distance à la caméra pour faire un effet de
     profondeur dans le nuanceur de fragments, que se passe-t-il si on
@@ -18,3 +23,10 @@ Q2: Lorsqu'on calcule la distance à la caméra pour faire un effet de
     « d = gl_FragCoord.w; » ?
 
     Comment expliquez-vous les comportements observés dans un cas ou l'autre?
+
+REP:Dans les deux cas, l'effet de profondeur n'est pas appliqué, ce qui nous indique que la 
+distance calculée par rapport à la caméra reste inférieure à la constante debAttenuation (soit 30). 
+En effet, les valeurs (en x, y et z) de gl_FragCoord sont à l'échelle de la fenêtre d'affichage, tandis que la 
+valeur en w indique l'échelle utilisée. Conséquemment, afin d'obtenir une distance valide entre les 
+sommets et la caméra, il faut absolument considérer l'échelle dans le calcul, soit en divisant la distance en z
+par l'échelle en w.

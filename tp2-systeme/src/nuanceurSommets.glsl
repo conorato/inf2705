@@ -14,7 +14,7 @@ layout(location=3) in vec4 Color;
 
 out Attribs {
    vec4 couleur;
-   // float clipDistance;
+   float clipDistance;
 } AttribsOut;
 
 void main( void )
@@ -23,7 +23,7 @@ void main( void )
    gl_Position = matrProj * matrVisu * matrModel * Vertex;
 
    vec4 posCamera = matrModel * Vertex;
-   gl_ClipDistance[0] = dot( planCoupe, posCamera );
+   AttribsOut.clipDistance = dot( planCoupe, posCamera );
    
    // couleur du sommet
    AttribsOut.couleur = Color;

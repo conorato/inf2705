@@ -1,7 +1,7 @@
 // Prénoms, noms et matricule des membres de l'équipe:
-// - Prénom1 NOM1 (matricule1)
-// - Prénom2 NOM2 (matricule2)
-#warning "Écrire les prénoms, noms et matricule des membres de l'équipe dans le fichier et commenter cette ligne"
+// - WILLIAM HARVEY (1851388)
+// - CLAUDIA ONORATO (1845448)
+
 
 #include <stdlib.h>
 #include <iostream>
@@ -295,7 +295,7 @@ void chargerNuanceurs()
          ProgNuanceur::afficherLogCompile( nuanceurObj );
          delete [] chainesSommets;
       }
-#if 0
+
       // partie 2:
       const GLchar *chainesGeometrie = ProgNuanceur::lireNuanceur( "nuanceurGeometrie.glsl" );
       if ( chainesGeometrie != NULL )
@@ -307,7 +307,7 @@ void chargerNuanceurs()
          ProgNuanceur::afficherLogCompile( nuanceurObj );
          delete [] chainesGeometrie;
       }
-#endif
+
       // attacher le nuanceur de fragments
       const GLchar *chainesFragments = ProgNuanceur::lireNuanceur( "nuanceurFragments.glsl" );
       if ( chainesFragments != NULL )
@@ -483,7 +483,6 @@ void FenetreTP::afficherScene( )
    glUniform1i( loccoulProfondeur, etat.coulProfondeur );
 
    // afficher le modèle et tenir compte du stencil et du plan de coupe
-   // partie 1: modifs ici ...
    
    glEnable( GL_STENCIL_TEST );
    glStencilFunc( GL_ALWAYS, 1, 1 ); 
@@ -500,6 +499,7 @@ void FenetreTP::afficherScene( )
    afficherQuad( 1.0 );
    glDisable( GL_STENCIL_TEST );
    
+   // Partie 2 : Sélection d'une planète selon sa couleur
    if ( etat.modeSelection )
    {
       glFinish();    
@@ -519,8 +519,6 @@ void FenetreTP::afficherScene( )
       Europa.couleur   = Europa.couleurSel;
       Ganymede.couleur = Ganymede.couleurSel;
       Callisto.couleur = Callisto.couleurSel;
-      
-      
 
       GLfloat couleur[3];
       glReadPixels( posX, posY, 1, 1, GL_RGB, GL_FLOAT, couleur );
@@ -569,7 +567,10 @@ void FenetreTP::afficherScene( )
 
 void FenetreTP::redimensionner( GLsizei w, GLsizei h )
 {
-   glViewport( 0, 0, w, h );
+   // Partie 2 : clôtures multiples
+   GLfloat h2 = 0.5*h;
+   GLfloat v[] = { 0, 0, w, h2, 0, h2, w, h2 };
+   glViewportArrayv(0, 2, v);
 }
 
 void FenetreTP::clavier( TP_touche touche )
