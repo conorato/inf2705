@@ -3,8 +3,20 @@ Q1: L'implantation du modèle d'illumination de Lambert selon ce qui est
     pas très efficace. Dites ce qui pourrait être amélioré et comment vous
     modifieriez le programme actuel afin d'avoir une meilleure implantation.
 
+REP: Comme le travail demandait l'implantation des trois modèles d'illumination,
+nous avons dû spécifier les normales aux sommets de chaque modèle, alors que le
+modèle de Lambert ne demande qu'une normale par face. Ainsi, il ne serait pas
+nécessaire de spécifier les normales par sommet.
+De plus, nous devrions faire le calcul de la réflexion dans le nuanceur de géométrie,
+car le modèle de Lambert consiste à ne calculer qu'une normale par face. Or, en calculant
+la réflexion dans le nuanceur de fragments, nous allourdissons de manière inutile les calculs.
+
 
 Q2: On pourrait vouloir que la texture de l'échiquier se « déplace » sur
     l'objet en fonction du temps, comme si elle glissait sur la surface dans
     une direction donnée. Comment implanteriez-vous cette fonctionnalité?
-
+    
+REP:On pourrait modifier les coordonnées de texture dans une fonction
+renderTexture() qui serait appelée juste avant l'affichage des modèles.
+Pour ce faire, il serait nécessaire de charger les nouvelles coordonnées de
+texture dans le vbo avant chaque affichage.

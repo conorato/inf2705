@@ -58,9 +58,9 @@ void main()
       AttribsOut.lumiDirFace = CalculerMoyenneVec( vec3[](AttribsIn[0].lumiDir,
                                                           AttribsIn[1].lumiDir,
                                                           AttribsIn[2].lumiDir ) );
-      AttribsOut.obsVecFace = CalculerMoyenneVec( vec3[](AttribsIn[0].obsVec,
-                                                         AttribsIn[1].obsVec,
-                                                         AttribsIn[2].obsVec ) );
+      AttribsOut.obsVecFace = CalculerMoyenneVec( vec3[]( AttribsIn[0].obsVec,
+                                                          AttribsIn[1].obsVec,
+                                                          AttribsIn[2].obsVec ) );
    } else {
      AttribsOut.normalFace = vec3( 0.0, 0.0, 0.0 );
      AttribsOut.lumiDirFace = vec3( 0.0, 0.0, 0.0 );

@@ -76,7 +76,8 @@ vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
    coul += FrontMaterial.ambient * LightSource[0].ambient;
 
    // Ajout de la composante diffure de la source de lumière
-   coul += FrontMaterial.diffuse * LightSource[0].diffuse * max( 0.0, dot( N, L ));
+   coul += utiliseCouleur ? FrontMaterial.diffuse * LightSource[0].diffuse * max( 0.0, dot( N, L )) :
+                            vec4(0.7,0.7,0.7,1.0) * LightSource[0].diffuse * max( 0.0, dot( N, L )) ;
 
    float composanteSpeculaire = utiliseBlinn ? max( 0.0, dot( normalize( L + O), N )):
                                                max( 0.0, dot( reflect( -L, N ), O));
@@ -95,8 +96,7 @@ void main( void )
    AttribsOut.normal = normalize( matrNormale *  Normal );
    AttribsOut.lumiDir = normalize((matrVisu * LightSource[0].position).xyz - gl_Position.xyz);
    AttribsOut.obsVec = LightModel.localViewer ? normalize(-gl_Position.xyz) : vec3(0.0, 0.0, 1.0);
-
-   // couleur du sommet
+   
    AttribsOut.couleur = calculerReflexion( AttribsOut.lumiDir, AttribsOut.normal, AttribsOut.obsVec );
    AttribsOut.spotDir = transpose( inverse( mat3( matrVisu ))) * ( -LightSource[0].spotDirection );
    AttribsOut.texCoord = TexCoord.st;

@@ -87,7 +87,9 @@ vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
   coul += FrontMaterial.ambient * LightSource[0].ambient;
 
   // Ajout de la composante diffure de la source de lumière
-  coul += FrontMaterial.diffuse * LightSource[0].diffuse * max( 0.0, dot( N, L ));
+
+  coul += utiliseCouleur ? FrontMaterial.diffuse * LightSource[0].diffuse * max( 0.0, dot( N, L )) :
+                           vec4(0.7,0.7,0.7,1.0) * LightSource[0].diffuse * max( 0.0, dot( N, L )) ;
 
   float composanteSpeculaire = utiliseBlinn ? max( 0.0, dot( normalize( L + O), N )):
                                               max( 0.0, dot( reflect( - L, N ), O));
@@ -98,24 +100,33 @@ vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
   return( clamp( coul, 0.0, 1.0 ) );
 }
 
+vec4 modifierTexelFonce(vec4 colorText, vec4 color) {
+   vec4 modifiedColor = color * colorText;
+   float meanColor = (colorText.r + colorText.g + colorText.b) / 3.0;
+   if( meanColor < 0.5 ) {
+      if( afficheTexelFonce == 1) {
+         modifiedColor = ( colorText + color ) / 2.0 ;
+      } else if (afficheTexelFonce == 2) {
+         discard;
+      }
+   }
+   return modifiedColor;
+}
+
 vec4 choisirCoulFrag(vec4 color) {
    vec4 couleurTexture = texture( laTexture, AttribsIn.texCoord );
-   if (texnumero == 0) {
-      return color;
-   } else {
-      return utiliseCouleur ? color * couleurTexture : couleurTexture;
-   }
+   return texnumero == 0 ? color : modifierTexelFonce(couleurTexture, color);
 }
 
 void main( void )
 {
    vec3 L = vec3( 0.0 ), N = vec3( 0.0 ), O = vec3( 0.0 );
-   vec4 color = vec4( 0.0);
+   vec4 color = vec4( 0.0, 0.0, 0.0, 1.0);
    if( typeIllumination == 0 ) {
       N = normalize(AttribsIn.normalFace);
       O = normalize(AttribsIn.obsVecFace);
       L = normalize(AttribsIn.lumiDirFace);
-      color = vec4( calculerReflexion( L, N, O ).xyz, 1.0 );
+      color.rgb = calculerReflexion( L, N, O ).xyz;
    } else if( typeIllumination == 1 ) {
       color = AttribsIn.couleur; //Gouraud a été calculé dans le nuanceur de sommets.
       L = normalize(AttribsIn.lumiDir);
@@ -123,8 +134,8 @@ void main( void )
       N = normalize(AttribsIn.normal);
       O = normalize(AttribsIn.obsVec);
       L = normalize(AttribsIn.lumiDir);
-      color = vec4( calculerReflexion( L, N, O ).xyz, 1.0 );
+      color.rgb = calculerReflexion( L, N, O ).xyz;
    }
-   FragColor.rgb = afficheNormales ? vec3(0.5 + 0.5 * N) :
-                                     vec3(choisirCoulFrag(color) * calculerSpot( normalize( AttribsIn.spotDir ), L));
+   color = choisirCoulFrag(color) * calculerSpot( normalize( AttribsIn.spotDir ), L);
+   FragColor.rgb = afficheNormales ? vec3(0.5 + 0.5 * N) : color.rgb;
 }

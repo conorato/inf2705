@@ -2,6 +2,7 @@
 // - Claudia Onorato (1845448)
 // - William Harvey (1851388)
 
+#include <time.h>
 #include <stdlib.h>
 #include <iostream>
 #include "inf2705-matrice.h"
@@ -9,6 +10,7 @@
 #include "inf2705-fenetre.h"
 #include "inf2705-texture.h"
 #include "inf2705-forme.h"
+
 
 // variables pour l'utilisation des nuanceurs
 GLuint prog;      // votre programme de nuanceurs
@@ -152,6 +154,10 @@ struct
 
 void calculerPhysique( )
 {
+   struct timespec req = {0};
+   req.tv_sec = 0;
+   req.tv_nsec = 16 * 1000000L;
+   nanosleep(&req, (struct timespec *)NULL);
    if ( etat.enmouvement )
    {
       static int sensTheta = 1;
@@ -401,6 +407,15 @@ void FenetreTP::initialiser()
 		0.0, 3.0,    0.0, 0.0,    3.0, 3.0,   3.0, 0.0,    // P4,P7,P0,P3
       0.0, 3.0,    0.0, 0.0,    3.0, 3.0,   3.0, 0.0     // P7,P6,P3,P2
    };
+   GLfloat cooTextDefaut[2*4*6] =
+   {
+      0.0, 1.0,    0.0, 0.0,    1.0, 1.0,   1.0, 0.0,    // P3,P2,P0,P1
+		0.0, 1.0,    0.0, 0.0,    1.0, 1.0,   1.0, 0.0,    // P5,P4,P1,P0
+		0.0, 1.0,    0.0, 0.0,    1.0, 1.0,   1.0, 0.0,    // P6,P5,P2,P1
+		0.0, 1.0,    0.0, 0.0,    1.0, 1.0,   1.0, 0.0,    // P7,P6,P3,P2
+		0.0, 1.0,    0.0, 0.0,    1.0, 1.0,   1.0, 0.0,    // P4,P7,P0,P3
+      0.0, 1.0,    0.0, 0.0,    1.0, 1.0,   1.0, 0.0     // P7,P6,P3,P2
+   };
 
    glGenVertexArrays( 2, vao );
    glGenBuffers( 5, vbo );
@@ -422,11 +437,15 @@ void FenetreTP::initialiser()
    glBindBuffer( GL_ARRAY_BUFFER, vbo[2] );
    glBufferData( GL_ARRAY_BUFFER, sizeof(cooTextDe), cooTextDe, GL_STATIC_DRAW );
    glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
-   glEnableVertexAttribArray(locTexCoord);
 
    glBindBuffer( GL_ARRAY_BUFFER, vbo[3] );
    glBufferData( GL_ARRAY_BUFFER, sizeof(cooTextEchec), cooTextEchec, GL_STATIC_DRAW );
    glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
+
+   glBindBuffer( GL_ARRAY_BUFFER, vbo[4] );
+   glBufferData( GL_ARRAY_BUFFER, sizeof(cooTextDefaut), cooTextDefaut, GL_STATIC_DRAW );
+   glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
+
    glEnableVertexAttribArray(locTexCoord);
 
    glBindVertexArray(0);
@@ -465,6 +484,18 @@ void FenetreTP::conclure()
    delete cone;
 }
 
+void chargerCoordTexture(int numeroVbo, int numeroTexture) {
+   glBindVertexArray( vao[0] );
+   // Associer le vbo ayant le bon tableau de coordonnées de texture
+   glBindBuffer( GL_ARRAY_BUFFER, vbo[numeroVbo] );
+   glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
+   glEnableVertexAttribArray(locTexCoord);
+   glActiveTexture( textures[numeroTexture] );
+   glUniform1i( loclaTexture, 0 );
+   glBindTexture(GL_TEXTURE_2D, textures[numeroTexture]);
+   glBindVertexArray( 0 );
+}
+
 void afficherModele()
 {
    // partie 3: paramètres de texture
@@ -472,23 +503,25 @@ void afficherModele()
    {
    default:
       //std::cout << "Sans texture" << std::endl;
+      glActiveTexture( GL_TEXTURE0 ); // activer la texture '0' (valeur de défaut)
+      glUniform1i( loclaTexture, 0 ); // '0' => utilisation de GL_TEXTURE0
       glBindTexture(GL_TEXTURE_2D, 0);
       break;
    case 1:
       //std::cout << "Texture 1 DE" << std::endl;
-      glBindTexture(GL_TEXTURE_2D, textures[0]);
+      chargerCoordTexture( 2, 0);
       break;
    case 2:
       //std::cout << "Texture 2 ECHIQUIER" << std::endl;
-      glBindTexture(GL_TEXTURE_2D, textures[1]);
+      chargerCoordTexture( 3, 1);
       break;
    case 3:
       //std::cout << "Texture 3 METAL" << std::endl;
-      glBindTexture(GL_TEXTURE_2D, textures[2]);
+      chargerCoordTexture( 4, 2);
       break;
    case 4:
       //std::cout << "Texture 4 MOSAIQUE" << std::endl;
-      glBindTexture(GL_TEXTURE_2D, textures[3]);
+      chargerCoordTexture( 4, 3);
       break;
    }
 
@@ -657,8 +690,6 @@ void FenetreTP::afficherScene()
    glUniformMatrix4fv( locmatrProj, 1, GL_FALSE, matrProj );
    glUniformMatrix4fv( locmatrVisu, 1, GL_FALSE, matrVisu );
    glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-   glActiveTexture( GL_TEXTURE0 ); // activer la texture '0' (valeur de défaut)
-   glUniform1i( loclaTexture, 0 ); // '0' => utilisation de GL_TEXTURE0
 
    afficherModele();
 }
@@ -720,10 +751,10 @@ void FenetreTP::clavier( TP_touche touche )
       echoEtats( );
       break;
 
-   //case TP_l: // Alterner entre une caméra locale à la scène ou distante (localViewer)
-   //   LightModel.localViewer = !LightModel.localViewer;
-   //   std::cout << " localViewer=" << LightModel.localViewer << std::endl;
-   //   break;
+   case TP_l: // Alterner entre une caméra locale à la scène ou distante (localViewer)
+     LightModel.localViewer = !LightModel.localViewer;
+     std::cout << " localViewer=" << LightModel.localViewer << std::endl;
+     break;
 
    case TP_a: // Incrémenter l'angle d'ouverture du cône du spot
    case TP_EGAL:
