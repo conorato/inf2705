@@ -385,15 +385,23 @@ void FenetreTP::initialiser()
    };
    GLfloat cooTextDe[2*4*6] =
    {
-      2.0/3.0, 2.0/3.0,   2.0/3.0, 1.0,       1.0,     1.0,       1.0,     2.0/3.0, // P3,P2,P0,P1
-      0.0,     1.0/3.0,   0.0,     2.0/3.0,   1.0/3.0, 2.0/3.0,   1.0/3.0, 1.0/3.0, // P5,P4,P1,P0
-      1.0/3.0, 2.0/3.0,   1.0/3.0, 1.0,       2.0/3.0, 1.0,       2.0/3.0, 2.0/3.0, // P6,P5,P2,P1
-      2.0/3.0, 1.0/3.0,   2.0/3.0, 2.0/3.0,   1.0,     2.0/3.0,   1.0,     1.0/3.0, // P7,P6,P3,P2
-      1.0/3.0, 0.0,       1.0/3.0, 1.0/3.0,   2.0/3.0, 1.0/3.0,   2.0/3.0, 0.0,     // P4,P7,P0,P3
-      1.0/3.0, 1.0/3.0,   1.0/3.0, 2.0/3.0,   2.0/3.0, 2.0/3.0,   2.0/3.0, 1.0/3.0  // P7,P6,P3,P2
+      2.0/3.0, 1.0/3.0,   2.0/3.0, 0.0    ,  1.0    , 1.0/3.0,   1.0    , 0.0    , // P3,P2,P0,P1
+      0.0    , 2.0/3.0,   0.0    , 1.0/3.0,  1.0/3.0, 2.0/3.0,   1.0/3.0, 1.0/3.0, // P5,P4,P1,P0
+      1.0/3.0, 1.0/3.0,   1.0/3.0, 0.0    ,  2.0/3.0, 1.0/3.0,   2.0/3.0, 0.0    , // P6,P5,P2,P1
+      2.0/3.0, 2.0/3.0,   2.0/3.0, 1.0/3.0,  1.0    , 2.0/3.0,   1.0    , 1.0/3.0, // P7,P6,P3,P2
+      1.0/3.0, 1.0    ,   1.0/3.0, 2.0/3.0,  2.0/3.0, 1.0    ,   2.0/3.0, 2.0/3.0, // P4,P7,P0,P3
+      1.0/3.0, 2.0/3.0,   1.0/3.0, 1.0/3.0,  2.0/3.0, 2.0/3.0,   2.0/3.0, 1.0/3.0  // P7,P6,P3,P2
+   };
+   GLfloat cooTextEchec[2*4*6] =
+   {
+      0.0, 3.0,    0.0, 0.0,    3.0, 3.0,   3.0, 0.0,    // P3,P2,P0,P1
+		0.0, 3.0,    0.0, 0.0,    3.0, 3.0,   3.0, 0.0,    // P5,P4,P1,P0
+		0.0, 3.0,    0.0, 0.0,    3.0, 3.0,   3.0, 0.0,    // P6,P5,P2,P1
+		0.0, 3.0,    0.0, 0.0,    3.0, 3.0,   3.0, 0.0,    // P7,P6,P3,P2
+		0.0, 3.0,    0.0, 0.0,    3.0, 3.0,   3.0, 0.0,    // P4,P7,P0,P3
+      0.0, 3.0,    0.0, 0.0,    3.0, 3.0,   3.0, 0.0     // P7,P6,P3,P2
    };
 
-   // allouer les objets OpenGL// P7,P6,P3,P2
    glGenVertexArrays( 2, vao );
    glGenBuffers( 5, vbo );
    // initialiser le VAO
@@ -413,6 +421,11 @@ void FenetreTP::initialiser()
    // (partie 3) charger le VBO pour les coordonnées de texture
    glBindBuffer( GL_ARRAY_BUFFER, vbo[2] );
    glBufferData( GL_ARRAY_BUFFER, sizeof(cooTextDe), cooTextDe, GL_STATIC_DRAW );
+   glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
+   glEnableVertexAttribArray(locTexCoord);
+
+   glBindBuffer( GL_ARRAY_BUFFER, vbo[3] );
+   glBufferData( GL_ARRAY_BUFFER, sizeof(cooTextEchec), cooTextEchec, GL_STATIC_DRAW );
    glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
    glEnableVertexAttribArray(locTexCoord);
 

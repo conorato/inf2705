@@ -99,10 +99,11 @@ vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
 }
 
 vec4 choisirCoulFrag(vec4 color) {
+   vec4 couleurTexture = texture( laTexture, AttribsIn.texCoord );
    if (texnumero == 0) {
       return color;
    } else {
-      return texture( laTexture, AttribsIn.texCoord );
+      return utiliseCouleur ? color * couleurTexture : couleurTexture;
    }
 }
 
