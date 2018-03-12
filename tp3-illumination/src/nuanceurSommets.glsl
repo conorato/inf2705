@@ -63,6 +63,8 @@ out Attribs {
    vec3 normal;
    vec3 lumiDir;
    vec3 obsVec;
+   vec3 spotDir;
+   vec2 texCoord;
 } AttribsOut;
 
 vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
@@ -88,16 +90,14 @@ vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
 void main( void )
 {
    // transformation standard du sommet
-   gl_Position = matrProj * matrVisu * matrModel * Vertex;
+   gl_Position = matrVisu * matrModel * Vertex;
 
-   // Position du sommet dans le repère de la Caméra
-   vec3 posSommet = vec3( matrVisu * matrModel * Vertex );
    AttribsOut.normal = normalize( matrNormale *  Normal );
-   AttribsOut.lumiDir = LightModel.localViewer ? normalize((matrVisu * LightSource[0].position).xyz /
-                                                           LightSource[0].position.w - posSommet):
-                                                           normalize((matrVisu * LightSource[0].position).xyz);
-   AttribsOut.obsVec = LightModel.localViewer ? normalize(-posSommet) : vec3(0.0, 0.0, 1.0);
+   AttribsOut.lumiDir = normalize((matrVisu * LightSource[0].position).xyz - gl_Position.xyz);
+   AttribsOut.obsVec = LightModel.localViewer ? normalize(-gl_Position.xyz) : vec3(0.0, 0.0, 1.0);
 
    // couleur du sommet
    AttribsOut.couleur = calculerReflexion( AttribsOut.lumiDir, AttribsOut.normal, AttribsOut.obsVec );
+   AttribsOut.spotDir = transpose( inverse( mat3( matrVisu ))) * ( -LightSource[0].spotDirection );
+   AttribsOut.texCoord = TexCoord.st;
 }

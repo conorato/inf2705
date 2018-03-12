@@ -1,7 +1,6 @@
 // Prénoms, noms et matricule des membres de l'équipe:
 // - Claudia Onorato (1845448)
 // - William Harvey (1851388)
-#warning "Écrire les prénoms, noms et matricule des membres de l'équipe dans le fichier et commenter cette ligne"
 
 #include <stdlib.h>
 #include <iostream>
@@ -384,8 +383,17 @@ void FenetreTP::initialiser()
      -1.0,  0.0,  0.0,   -1.0,  0.0,  0.0,  -1.0,  0.0,  0.0,   -1.0,  0.0,  0.0,   // P4,P7,P0,P3
       0.0,  0.0,  1.0,    0.0,  0.0,  1.0,   0.0,  0.0,  1.0,    0.0,  0.0,  1.0    // P4,P5,P7,P6
    };
+   GLfloat cooTextDe[2*4*6] =
+   {
+      2.0/3.0, 2.0/3.0,   2.0/3.0, 1.0,       1.0,     1.0,       1.0,     2.0/3.0, // P3,P2,P0,P1
+      0.0,     1.0/3.0,   0.0,     2.0/3.0,   1.0/3.0, 2.0/3.0,   1.0/3.0, 1.0/3.0, // P5,P4,P1,P0
+      1.0/3.0, 2.0/3.0,   1.0/3.0, 1.0,       2.0/3.0, 1.0,       2.0/3.0, 2.0/3.0, // P6,P5,P2,P1
+      2.0/3.0, 1.0/3.0,   2.0/3.0, 2.0/3.0,   1.0,     2.0/3.0,   1.0,     1.0/3.0, // P7,P6,P3,P2
+      1.0/3.0, 0.0,       1.0/3.0, 1.0/3.0,   2.0/3.0, 1.0/3.0,   2.0/3.0, 0.0,     // P4,P7,P0,P3
+      1.0/3.0, 1.0/3.0,   1.0/3.0, 2.0/3.0,   2.0/3.0, 2.0/3.0,   2.0/3.0, 1.0/3.0  // P7,P6,P3,P2
+   };
 
-   // allouer les objets OpenGL
+   // allouer les objets OpenGL// P7,P6,P3,P2
    glGenVertexArrays( 2, vao );
    glGenBuffers( 5, vbo );
    // initialiser le VAO
@@ -403,7 +411,10 @@ void FenetreTP::initialiser()
    glEnableVertexAttribArray(locNormal);
 
    // (partie 3) charger le VBO pour les coordonnées de texture
-   // ...
+   glBindBuffer( GL_ARRAY_BUFFER, vbo[2] );
+   glBufferData( GL_ARRAY_BUFFER, sizeof(cooTextDe), cooTextDe, GL_STATIC_DRAW );
+   glVertexAttribPointer( locTexCoord, 2, GL_FLOAT, GL_FALSE, 0, 0 );
+   glEnableVertexAttribArray(locTexCoord);
 
    glBindVertexArray(0);
 
@@ -448,18 +459,23 @@ void afficherModele()
    {
    default:
       //std::cout << "Sans texture" << std::endl;
+      glBindTexture(GL_TEXTURE_2D, 0);
       break;
    case 1:
       //std::cout << "Texture 1 DE" << std::endl;
+      glBindTexture(GL_TEXTURE_2D, textures[0]);
       break;
    case 2:
       //std::cout << "Texture 2 ECHIQUIER" << std::endl;
+      glBindTexture(GL_TEXTURE_2D, textures[1]);
       break;
    case 3:
       //std::cout << "Texture 3 METAL" << std::endl;
+      glBindTexture(GL_TEXTURE_2D, textures[2]);
       break;
    case 4:
       //std::cout << "Texture 4 MOSAIQUE" << std::endl;
+      glBindTexture(GL_TEXTURE_2D, textures[3]);
       break;
    }
 
@@ -500,18 +516,12 @@ void afficherModele()
          matrModel.Translate( 0.0, 0.0, -0.5 );
          matrModel.Scale( 0.5, 0.5, 0.5 );
          glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-         // matrVM = glm::mat3(matrVisu.getMatr()*matrModel.getMatr());
-         // matrNormale = glm::inverse( matrVM );
-         // glUniformMatrix4fv( locmatrNormale, 1, GL_TRUE, glm::value_ptr( matrNormale ));
          theiere->afficher( );
          break;
       case 5:
          matrModel.PushMatrix(); {
             matrModel.Translate( 0.0, 0.0, -1.5 );
             glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-          //   matrVM = glm::mat3(matrVisu.getMatr()*matrModel.getMatr());
-          // matrNormale = glm::inverse( matrVM );
-          //   glUniformMatrix4fv( locmatrNormale, 1, GL_TRUE, glm::value_ptr( matrNormale ));
             cylindre->afficher();
          } matrModel.PopMatrix();
          break;
@@ -519,9 +529,6 @@ void afficherModele()
          matrModel.PushMatrix(); {
             matrModel.Translate( 0.0, 0.0, -1.5 );
             glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-            // matrVM = glm::mat3(matrVisu.getMatr()*matrModel.getMatr());
-            // matrNormale = glm::inverse( matrVM );
-            // glUniformMatrix4fv( locmatrNormale, 1, GL_TRUE, glm::value_ptr( matrNormale ));
             cone->afficher();
          } matrModel.PopMatrix();
          break;
@@ -637,7 +644,7 @@ void FenetreTP::afficherScene()
    glUniformMatrix4fv( locmatrProj, 1, GL_FALSE, matrProj );
    glUniformMatrix4fv( locmatrVisu, 1, GL_FALSE, matrVisu );
    glUniformMatrix4fv( locmatrModel, 1, GL_FALSE, matrModel );
-   //glActiveTexture( GL_TEXTURE0 ); // activer la texture '0' (valeur de défaut)
+   glActiveTexture( GL_TEXTURE0 ); // activer la texture '0' (valeur de défaut)
    glUniform1i( loclaTexture, 0 ); // '0' => utilisation de GL_TEXTURE0
 
    afficherModele();

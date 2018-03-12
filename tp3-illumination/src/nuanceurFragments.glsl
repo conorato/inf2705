@@ -1,4 +1,5 @@
 #version 410
+#define M_PI 3.141592653589793238
 
 // Définition des paramètres des sources de lumière
 layout (std140) uniform LightSourceParameters
@@ -55,15 +56,25 @@ in Attribs {
    vec3 normal;
    vec3 lumiDir;
    vec3 obsVec;
+   vec3 spotDir;
    vec3 normalFace;
    vec3 lumiDirFace;
    vec3 obsVecFace;
+   vec2 texCoord;
 } AttribsIn;
 
 out vec4 FragColor;
 
+const float DEG_TO_RAD = M_PI / 180;
+
 float calculerSpot( in vec3 spotDir, in vec3 L )
 {
+   float cosAngleOuverture = cos(LightSource[0].spotAngleOuverture * DEG_TO_RAD);
+   float cosAngleFrag = dot(L, spotDir);
+   float factDirect3D = smoothstep(pow(cosAngleOuverture, 1.01 + LightSource[0].spotExponent / 2), cosAngleOuverture, cosAngleFrag);
+   if( cosAngleFrag >= cosAngleOuverture) {
+      return utiliseDirect ? pow(cosAngleFrag, LightSource[0].spotExponent): factDirect3D;
+   }
    return( 0.0 );
 }
 
@@ -79,7 +90,7 @@ vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
   coul += FrontMaterial.diffuse * LightSource[0].diffuse * max( 0.0, dot( N, L ));
 
   float composanteSpeculaire = utiliseBlinn ? max( 0.0, dot( normalize( L + O), N )):
-                                              max( 0.0, dot( reflect( -L, N ), O));
+                                              max( 0.0, dot( reflect( - L, N ), O));
 
   // Ajout de la composante spéculaire de la source lumineuse
   coul += FrontMaterial.specular * LightSource[0].specular * pow( composanteSpeculaire, FrontMaterial.shininess );
@@ -87,26 +98,32 @@ vec4 calculerReflexion( in vec3 L, in vec3 N, in vec3 O )
   return( clamp( coul, 0.0, 1.0 ) );
 }
 
+vec4 choisirCoulFrag(vec4 color) {
+   if (texnumero == 0) {
+      return color;
+   } else {
+      return texture( laTexture, AttribsIn.texCoord );
+   }
+}
+
 void main( void )
 {
-   vec3 L, N, O;
-   // assigner la couleur finale
-   //FragColor = AttribsIn.couleur;
+   vec3 L = vec3( 0.0 ), N = vec3( 0.0 ), O = vec3( 0.0 );
+   vec4 color = vec4( 0.0);
    if( typeIllumination == 0 ) {
       N = normalize(AttribsIn.normalFace);
       O = normalize(AttribsIn.obsVecFace);
       L = normalize(AttribsIn.lumiDirFace);
-      FragColor = vec4( calculerReflexion( L, N, O ).xyz, 1.0 );
+      color = vec4( calculerReflexion( L, N, O ).xyz, 1.0 );
    } else if( typeIllumination == 1 ) {
-      FragColor = AttribsIn.couleur;
+      color = AttribsIn.couleur; //Gouraud a été calculé dans le nuanceur de sommets.
+      L = normalize(AttribsIn.lumiDir);
    } else if( typeIllumination == 2 ) {
       N = normalize(AttribsIn.normal);
       O = normalize(AttribsIn.obsVec);
       L = normalize(AttribsIn.lumiDir);
-      FragColor = vec4( calculerReflexion( L, N, O ).xyz, 1.0 );
+      color = vec4( calculerReflexion( L, N, O ).xyz, 1.0 );
    }
-
-   // vec4 coul = calculerReflexion( L, N, O );
-   // ...
-   //FragColor = afficheNormales ? vec4( 0.5 + 0.5 * N, 1.0 ) : vec4( 0.5, 0.5, 0.5, 1.0 );
+   FragColor.rgb = afficheNormales ? vec3(0.5 + 0.5 * N) :
+                                     vec3(choisirCoulFrag(color) * calculerSpot( normalize( AttribsIn.spotDir ), L));
 }
