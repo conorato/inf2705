@@ -139,12 +139,12 @@ void calculerPhysique()
         // À MODIFIER (partie 1)
         // déplacer les particules en utilisant le nuanceur de rétroaction
         glUseProgram(progRetroaction);
-        glUniform1f(locdtRetroaction,       etat.enmouvement ? parametres.dt        : 0.0);
-        glUniform1f(loctempsRetroaction,    etat.enmouvement ? parametres.temps     : 0.0);
-        glUniform1f(locgraviteRetroaction,  etat.enmouvement ? parametres.gravite   : 0.0);
-        glUniform1f(loctempsMaxRetroaction, etat.enmouvement ? parametres.tempsMax  : 0.0);
-        glUniform3fv(locbDimRetroaction, 1, glm::value_ptr(etat.bDim));
-        glUniform3fv(locpositionPuitsRetroaction, 1, glm::value_ptr(etat.positionPuits) );
+        glUniform1f(locdtRetroaction, parametres.dt);
+        glUniform1f(loctempsRetroaction, parametres.temps);
+        glUniform1f(locgraviteRetroaction, parametres.gravite);
+        glUniform1f(loctempsMaxRetroaction, parametres.tempsMax);
+        glUniform3f(locbDimRetroaction, etat.bDim.x, etat.bDim.y, etat.bDim.z);
+        glUniform3f(locpositionPuitsRetroaction, etat.positionPuits.x, etat.positionPuits.y, etat.positionPuits.z );
 
         // débuter la requête (si impression)
         if (etat.impression)
@@ -153,7 +153,7 @@ void calculerPhysique()
         // « dessiner »
         // Les résultats seront stockés dans vbo[1]
         glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, vbo[1]);
-        glBindVertexArray(vao[1]); 
+        glBindVertexArray(vao[1]); // VAO qui est lié au VBO contenant les informations sur la physique
         glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 
         glVertexAttribPointer(locpositionRetroaction, 3, GL_FLOAT, GL_FALSE, sizeof(Part), reinterpret_cast<void *>(offsetof(Part, position)));
@@ -181,6 +181,7 @@ void calculerPhysique()
 
         if (etat.impression)
         {
+            glFlush(); // attendre que la carte graphique ait terminé le traitement
             // obtenir et imprimer les résultats
             GLuint nresul;
             glGetQueryObjectuiv(requete, GL_QUERY_RESULT, &nresul);
@@ -253,7 +254,7 @@ void chargerTextures()
 {
     unsigned char *pixels;
     GLsizei largeur, hauteur;
-    // if ( ( pixels = ChargerImage( "textures/echiquier.bmp", largeur, hauteur ) ) != NULL )
+    //if ( ( pixels = ChargerImage( "textures/echiquier.bmp", largeur, hauteur ) ) != NULL )
     if ((pixels = ChargerImage("textures/etincelle.bmp", largeur, hauteur)) != NULL)
     {
         glGenTextures(1, &etat.textureETINCELLE);
@@ -621,10 +622,11 @@ void FenetreTP::afficherScene()
         glBindTexture(GL_TEXTURE_2D, etat.textureLEPRECHAUN);
         break;
     }
-    glEnable(GL_BLEND);
-    // glDrawTransformFeedback( GL_POINTS, tfo[0] );
+
+    // tracer le résultat de la rétroaction
+    glDrawTransformFeedback( GL_POINTS, tfo[0] );
     glDrawArrays(GL_POINTS, 0, parametres.nparticules);
-    glDisable(GL_BLEND);
+
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
 
