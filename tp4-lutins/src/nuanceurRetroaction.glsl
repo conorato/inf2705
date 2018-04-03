@@ -13,24 +13,20 @@ out vec3 vitesseMod;
 out vec4 couleurMod;
 out float tempsRestantMod;
 
-uint randhash( uint seed ) // entre  0 et UINT_MAX
-{
+uint randhash( uint seed ) { // entre  0 et UINT_MAX
    uint i=(seed^12345391u)*2654435769u;
    i ^= (i<<6u)^(i>>26u);
    i *= 2654435769u;
    i += (i<<5u)^(i>>12u);
    return i;
 }
-float myrandom( uint seed ) // entre  0 et 1
-{
+float myrandom( uint seed ) { // entre  0 et 1
    const float UINT_MAX = 4294967295.0;
    return float(randhash(seed)) / UINT_MAX;
 }
 
-void main( void )
-{
-   if ( tempsRestant <= 0.0 )
-   {
+void main( void ) {
+   if ( tempsRestant <= 0.0 ) {
         // se préparer à produire une valeur un peu aléatoire
         uint seed = uint(temps * 1000.0) + uint(gl_VertexID);
         // faire renaitre la particule au puits
@@ -50,9 +46,7 @@ void main( void )
         couleurMod = vec4( mix( COULMIN, COULMAX, myrandom(seed++) ),
                            mix( COULMIN, COULMAX, myrandom(seed++) ),
                            mix( COULMIN, COULMAX, myrandom(seed++) ), 1.0 );
-   }
-   else
-   {  
+   } else {  
         // avancer la particule
         positionMod = position + vitesse * dt;
         vitesseMod = vitesse;
@@ -72,14 +66,16 @@ void main( void )
             vec3 N = posSphUnitaire / dist; //  normaliser N
             vec3  vitReflechieSphUnitaire = reflect( vitSphUnitaire , N );
             vitesseMod = vitReflechieSphUnitaire / bDim;
+            couleurMod.a *= 0.5;
         }
   
         // collision avec le sol ?
         if ( positionMod.z <= 0 ) {
             vitesseMod = reflect( vitesse , vec3(0, 0, 1) );
+            couleurMod.a *= 0.5;
         }
   
         // appliquer la gravité
-        vitesseMod.z = vitesseMod.z - 0.5 * gravite * dt;
+        vitesseMod.z -= 0.5 * gravite * dt;
    }  
 }

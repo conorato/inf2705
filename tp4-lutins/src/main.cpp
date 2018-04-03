@@ -61,7 +61,7 @@ struct Part
     GLfloat tempsRestant; // temps de vie restant en secondes
                           // (vous pouvez ajouter d'autres éléments, mais il faudra les prévoir dans les varyings)
 };
-const unsigned int MAXNPARTICULES = 1000000;
+const unsigned int MAXNPARTICULES = 10000000;
 Part part[MAXNPARTICULES]; // le tableau de particules
 
 struct Parametres
@@ -160,6 +160,11 @@ void calculerPhysique()
         glVertexAttribPointer(loctempsRestantRetroaction, 1, GL_FLOAT, GL_FALSE, sizeof(Part), reinterpret_cast<void *>(offsetof(Part, tempsRestant)));
         glVertexAttribPointer(locvitesseRetroaction, 3, GL_FLOAT, GL_FALSE, sizeof(Part), reinterpret_cast<void *>(offsetof(Part, vitesse)));
         glVertexAttribPointer(loccouleurRetroaction, 4, GL_FLOAT, GL_FALSE, sizeof(Part), reinterpret_cast<void *>(offsetof(Part, couleur)));
+
+        glEnableVertexAttribArray(locpositionRetroaction);
+        glEnableVertexAttribArray(loctempsRestantRetroaction);
+		glEnableVertexAttribArray(locvitesseRetroaction);
+		glEnableVertexAttribArray(loccouleurRetroaction);
 
         glEnable(GL_RASTERIZER_DISCARD);
         glBeginTransformFeedback(GL_POINTS);
@@ -619,7 +624,7 @@ void FenetreTP::afficherScene()
     }
 
     // tracer le résultat de la rétroaction
-    //glDrawTransformFeedback( GL_POINTS, tfo[0] );
+    glDrawTransformFeedback( GL_POINTS, tfo[0] );
     glDrawArrays(GL_POINTS, 0, parametres.nparticules);
 
     glBindTexture(GL_TEXTURE_2D, 0);
