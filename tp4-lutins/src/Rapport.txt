@@ -5,10 +5,35 @@ Q1: Dans la partie 1, des points de taille fixe sont affichés à l'écran. Leur
     i) Comment faire pour que la taille d'un point varie de façon inverse à sa distance du plan avant du volume de visualisation ?
     ii) Donnez l'énoncé GLSL que vous utiliseriez pour implanter ceci.
 
+i) Afin de faire varier la taille d'un point selon sa distance quant au plan avant du volume de visualisation, nous devons l'évaluer selon sa taille
+constante (étant initialement de 5 pixels) et de la distance. Celle-ci peut être déterminée dans le nuanceur de sommets, lorsque nous calculons la position 
+de chaque vertex. Ainsi, quand la distance augmente, la taille du point diminue. La taille du point correspond donc à sa valeur initiale divisé par la distance.
 
+ii) Reprenons un extrait de notre code du nuanceur de sommets:
+
+gl_Position = matrVisu * matrModel * Vertex;
+
+Nous y ajouterions dans le nuanceur de géométrie:
+
+const float pointSize = 5.0;    // Déjà présent dans notre code
+gl_PointSize = pointSize / -gl_in[0].gl_Position.z;
+
+Le signe négatif est pertinent, car la norme en openGl est que l'axe des z est sortant de l'écran.
 
 Q2: Pour afficher une étincelle qui tourne sur elle-même, on a appliqué une matrice de rotation sur les quatre sommets.
     i) Pourrait-on faire tourner l'étincelle en appliquant la même matrice de rotation sur les coordonnées de texture plutôt que sur les coordonnées des sommets?
     ii) Quel problème observerions-nous alors et comment devrait-il être corrigé?
 
     Afin de facilement répondre à cette question, vous pouvez remplacer (temporairement!) l'image de l'étincelle de ce TP par l'image de l'échiquier du TP3.  Si vous appliquez ensuite la matrice de rotation sur les coordonnées de texture plutôt que sur les coordonnées des sommets, vous pourrez alors très bien voir ce qui se passe.
+
+i) Oui, il est possible d'appliquer la matrice de rotation sur les coordonnées de la texture plutôt que les coordonnées des sommets. En effet, en considérant le
+code que nous avons fourni, il ne faudrait qu'envoyer ces coordonnées de texture :
+
+AttribsOut.texCoord = (texnumero == 1)? rotate(coins[i], 6.0 * AttribsIn[0].tempsRestant)+ vec2( 0.5, 0.5 ): 
+                                        coins[i] + vec2( 0.5, 0.5 );
+
+ii) Or, le problème avec cette solution est visible avec la texture de l'échiquier. La texture tourne sur elle-même dans le carré qui conserve la
+même orientation. Ainsi, lorsque la texture a effectué une rotation de 45 degré, les sommets de celles-ci se situent au milieu des arrêtes du carré.
+Donc, les couleurs se trouvant aux arrêtes de la texture sont étirées dans la forme, ce qui ne produit pas l'effet désiré. 
+Afin d'éviter ce problème, nous ne devrions pas afficher les fragments recouverts de la texture si celle-ci est étirée. Ceci pourrait être réalisé dans
+le nuanceur de fragments, par un test qui permettrait de discard les fragments voulus.

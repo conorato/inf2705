@@ -56,7 +56,7 @@ void main( void ) {
   
         // garder la couleur courante
         couleurMod = couleur;
-
+  
         // collision avec la demi-sphère ?
         vec3 posSphUnitaire = positionMod / bDim;
         vec3 vitSphUnitaire = vitesseMod * bDim;
