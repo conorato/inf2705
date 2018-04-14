@@ -1,7 +1,6 @@
 // Prénoms, noms et matricule des membres de l'équipe:
-// - Prénom1 NOM1
-// - Prénom2 NOM2
-#warning "Écrire les prénoms, noms et matricule des membres de l'équipe ci-dessus et commenter cette ligne"
+// - William Harvey (1851388)
+// - Claudia Onorato (1845448)
 
 #include <iostream>
 #include "inf2705-matrice.h"
@@ -293,7 +292,6 @@ void chargerNuanceurs()
          ProgNuanceur::afficherLogCompile( nuanceurObj );
          delete [] chainesSommets[1];
       }
-#if 0
       // partie 1: À ACTIVER (enlever le #if 0 et le #endif)
       // attacher le nuanceur de controle de la tessellation
       const GLchar *chainesTessCtrl[2] = { preambulechar, ProgNuanceur::lireNuanceur( "nuanceurTessCtrl.glsl" ) };
@@ -317,7 +315,6 @@ void chargerNuanceurs()
          ProgNuanceur::afficherLogCompile( nuanceurObj );
          delete [] chainesTessEval[1];
       }
-#endif
       // attacher le nuanceur de géometrie
       const GLchar *chainesGeometrie[2] = { preambulechar, ProgNuanceur::lireNuanceur( "nuanceurGeometrie.glsl" ) };
       if ( chainesGeometrie[1] != NULL )
@@ -465,7 +462,21 @@ void FenetreTP::conclure()
 void definirProjection( int OeilMult, int w, int h ) // 0: mono, -1: oeil gauche, +1: oeil droit
 {
    // partie 2: utiliser plutôt Frustum() pour le stéréo
-   matrProj.Perspective( 35.0, (GLdouble) w / (GLdouble) h, vue.zavant, vue.zarriere );
+   if( OeilMult == 0 ) {
+      matrProj.Perspective( 35.0, (GLdouble) w / (GLdouble) h, vue.zavant, vue.zarriere );
+   } else {
+      const GLdouble resolution = 100.0; // pixels par pouce
+      GLdouble oeilDecalage = OeilMult * vue.dip/2.0;
+      GLdouble proportionProfondeur = vue.zavant / vue.zecran;  // la profondeur du plan de parallaxe nulle
+
+      matrProj.Frustum( (-0.5 * w / resolution - oeilDecalage ) * proportionProfondeur,
+                        ( 0.5 * w / resolution - oeilDecalage ) * proportionProfondeur,
+                        (-0.5 * h / resolution                ) * proportionProfondeur,
+                        ( 0.5 * h / resolution                ) * proportionProfondeur,
+                        vue.zavant, vue.zarriere );
+      matrProj.Translate( -oeilDecalage, 0.0, 0.0 );
+      glUniformMatrix4fv( locmatrProj, 1, GL_FALSE, matrProj );
+   }
 }
 
 void afficherDecoration()
@@ -536,8 +547,8 @@ void afficherModele()
    glPatchParameteri( GL_PATCH_VERTICES, 4 );
 
    // À MODIFIER (utiliser des GL_PATCHES)
-   glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
-   //glDrawArrays( GL_PATCHES, 0, 4 ); // UTILISER des GL_PATCHES plutôt que des GL_TRIANGLES
+   //glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
+   glDrawArrays( GL_PATCHES, 0, 4 ); // UTILISER des GL_PATCHES plutôt que des GL_TRIANGLES
 
    glBindVertexArray( 0 );
 
@@ -605,6 +616,8 @@ void FenetreTP::afficherScene()
    switch ( vue.affichageStereo )
    {
    case 0: // mono
+      redimensionner(largeur_, hauteur_);
+
       definirProjection( 0, largeur_, hauteur_ );
       glUniformMatrix4fv( locmatrProj, 1, GL_FALSE, matrProj );
       afficherModele();
@@ -612,13 +625,26 @@ void FenetreTP::afficherScene()
 
    case 1: // stéréo anaglyphe
       // partie 2: à modifier pour afficher en anaglyphe
-      definirProjection( 0, largeur_, hauteur_ );
+      redimensionner(largeur_, hauteur_);
+
+      definirProjection( -1, largeur_, hauteur_ );
       glUniformMatrix4fv( locmatrProj, 1, GL_FALSE, matrProj );
+      glColorMask( GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE );
       afficherModele();
+
+      glClear( GL_DEPTH_BUFFER_BIT );
+      
+      definirProjection( 1, largeur_, hauteur_ );
+      glUniformMatrix4fv( locmatrProj, 1, GL_FALSE, matrProj );
+      glColorMask( GL_FALSE, GL_TRUE, GL_TRUE, GL_TRUE );
+      afficherModele();
+
+      glColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
       break;
 
    case 2: // stéréo double
       // partie 2: à modifier pour afficher en stéréo double
+      redimensionner(largeur_, hauteur_);
       definirProjection( 0, largeur_, hauteur_ );
       glUniformMatrix4fv( locmatrProj, 1, GL_FALSE, matrProj );
       afficherModele();
@@ -629,7 +655,12 @@ void FenetreTP::afficherScene()
 // fonction de redimensionnement de la fenêtre graphique
 void FenetreTP::redimensionner( GLsizei w, GLsizei h )
 {
-   glViewport( 0, 0, w, h );
+   if( vue.affichageStereo ==  2 ) {
+         GLfloat v[] = { 0, 0, 0.5 * w, h, 0.5 * w, 0, 0.5 * w, h };
+         glViewportArrayv( 0, 2, v);
+   } else {
+      glViewport( 0, 0, w, h );
+   } 
 }
 
 void FenetreTP::clavier( TP_touche touche )
@@ -889,6 +920,10 @@ int main( int argc, char *argv[] )
    bool boucler = true;
    while ( boucler )
    {
+      struct timespec req = {0};
+      req.tv_sec = 0;
+      req.tv_nsec = 16 * 1000000L;
+      nanosleep(&req, (struct timespec *)NULL);
       // mettre à jour la physique
       calculerPhysique( );
 

@@ -30,11 +30,11 @@ void main()
 
    if ( gl_InvocationID == 0 )
    {
-      gl_TessLevelInner[0] =
+      gl_TessLevelInner[0] = TessLevelInner;
       gl_TessLevelInner[1] = TessLevelInner;
-      gl_TessLevelOuter[0] =
-      gl_TessLevelOuter[1] =
-      gl_TessLevelOuter[2] =
+      gl_TessLevelOuter[0] = TessLevelOuter;
+      gl_TessLevelOuter[1] = TessLevelOuter;
+      gl_TessLevelOuter[2] = TessLevelOuter;
       gl_TessLevelOuter[3] = TessLevelOuter;
    }
 }

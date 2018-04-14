@@ -56,28 +56,28 @@ void main( void )
       // direction de la lumière
       // calcul du vecteur de la surface vers la source lumineuse
       // normaliser le vecteur de la surface vers la source lumineuse
-      //vec3 L = ...
+      vec3 L = normalize(AttribsIn.lumiDir[i]);
 
       // produit scalaire pour le calcul de la réflexion diffuse
       // normale . direction de la lumière
-      //float NdotL = ...
+      float NdotL = dot(N, L);
 
       // calcul de l'éclairage seulement si le produit scalaire est positif
-      //if ( NdotL > 0.0 )
+      if ( NdotL > 0.0 )
       {
          // ajouter la contribution de la composante diffuse
 #if ( INDICEDIFFUSE == 0 )
          // la composante diffuse (kd) du matériel est utilisé
-         //coul += FrontMaterial.diffuse * LightSource.diffuse * ...;
+         coul += FrontMaterial.diffuse * LightSource.diffuse * NdotL;
 #else
          // la composante diffuse (kd) provient de la texture 'textureCoul'
-         //coul += ...
+         coul += texture(textureCoul, AttribsIn.texCoord) * LightSource.diffuse * NdotL;
 #endif
 
          // ajouter la contribution de la composante spéculaire
          // produit scalaire pour la réflexion spéculaire (selon Blinn)
-         //...
-         //coul += FrontMaterial.specular * LightSource.specular * ...
+         float NdotHV = max( 0.0, dot( normalize( L + normalize(AttribsIn.obsVec )), N ) );
+         coul += FrontMaterial.specular * LightSource.specular * pow( NdotHV, FrontMaterial.shininess );
       }
    }
 
