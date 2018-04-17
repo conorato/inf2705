@@ -6,6 +6,11 @@ Q1: Vous avez probablement remarqué que même en demandant un très grand
     Que doit-on alors faire si on veut, malgré tout, une tessellation deux
     fois plus fine dans chaque direction?
 
+REP:Si on veut une tesselation deux fois plus fine dans chaque direction,
+on veut indiquer au nuanceur de contrôle de la tesselation une taille de
+patch deux fois plus élevé. Pour ce faire, on multiplie par deux gl_MaxPatchVertices
+qui est un paramère par défaut du nuanceur.
+
 
 Q2: Comment implanter la visualisation d'une surface quelconque exprimée de
     façon paramétrique: S(s,t) = (x(s,t),y(s,t),z(s,t))
@@ -20,3 +25,21 @@ Q2: Comment implanter la visualisation d'une surface quelconque exprimée de
                (4/3)^s*sin(t)*sin(t)*sin(s),
                (4/3)^s*sin(t)*cos(t) );
     avec s = 0 .. 1, t = 0 .. 2*PI.
+
+REP:
+   // déplacement selon la fonction mathématique
+   vec3 FctParam( vec2 st )
+   {
+      vec3 S;
+      float s = st.x;
+      float t = st.y;
+      float z = 0.0;
+   #if ( INDICEFONCTION == 1 )
+      S = vec3( sin(t)*cos(s), sin(t)*sin(s), cos(t) );
+   #elif ( INDICEFONCTION == 2 )
+      S = vec3( (4/3)^s*sin(t)*sin(t)*cos(s),
+                (4/3)^s*sin(t)*sin(t)*sin(s),
+                (4/3)^s*sin(t)*cos(t) );
+   #endif
+      return facteurDeform * S;
+   }

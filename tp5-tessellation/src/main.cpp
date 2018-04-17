@@ -644,9 +644,12 @@ void FenetreTP::afficherScene()
 
    case 2: // stéréo double
       // partie 2: à modifier pour afficher en stéréo double
-      redimensionner(largeur_, hauteur_);
-      definirProjection( 0, largeur_, hauteur_ );
+      glViewport(0, 0, 0.5 * largeur_, hauteur_);
+      definirProjection( -1, largeur_, hauteur_ );
       glUniformMatrix4fv( locmatrProj, 1, GL_FALSE, matrProj );
+      afficherModele();
+      glViewport(0.5 * largeur_, 0, 0.5 * largeur_, hauteur_);
+      definirProjection( 1, largeur_, hauteur_ );
       afficherModele();
       break;
    }
@@ -655,12 +658,7 @@ void FenetreTP::afficherScene()
 // fonction de redimensionnement de la fenêtre graphique
 void FenetreTP::redimensionner( GLsizei w, GLsizei h )
 {
-   if( vue.affichageStereo ==  2 ) {
-         GLfloat v[] = { 0, 0, 0.5 * w, h, 0.5 * w, 0, 0.5 * w, h };
-         glViewportArrayv( 0, 2, v);
-   } else {
-      glViewport( 0, 0, w, h );
-   } 
+   glViewport( 0, 0, w, h );
 }
 
 void FenetreTP::clavier( TP_touche touche )

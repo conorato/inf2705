@@ -62,7 +62,6 @@ void main()
                                    (matrVisu * LightSource.position[j]).xyz / LightSource.position[j].w - posVisu.xyz :
                                    (matrVisu * LightSource.position[j]).xyz; 
       }
-
       // vecteur de la direction vers l'observateur
       AttribsOut.obsVec = normalize(-posVisu.xyz);
 
